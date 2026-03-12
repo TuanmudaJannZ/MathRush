@@ -149,6 +149,7 @@ mr_muted     →  status suara (true / false)
 ```
 
 <div align="center">
+  
 **Dibuat dengan ⚛ oleh [Ahmad Januar D.K](https://github.com/TuanmudaJannZ)**
 
 *"The important thing is to not stop questioning. Curiosity has its own reason for existing."*  
