@@ -141,31 +141,45 @@ body.dark .ta-bar-bg{background:#252343;}
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html{height:100%;-webkit-font-smoothing:antialiased;}
+/* Hide scrollbars globally but keep functionality */
+::-webkit-scrollbar{width:0;height:0;}
+* { scrollbar-width:none; }
+/* Ensure touch events propagate correctly on all interactive elements */
+button,a,[onclick]{ touch-action:manipulation; }
 body{
-  min-height:100vh; min-height:100svh; font-family:var(--f-ui); color:var(--g900);
+  font-family:var(--f-ui); color:var(--g900);
   background:
     radial-gradient(ellipse 900px 600px at 15% 5%,  #D5CEFF 0%,transparent 62%),
     radial-gradient(ellipse 700px 500px at 85% 90%,  #BEF0E4 0%,transparent 60%),
     radial-gradient(ellipse 500px 400px at 80% 10%,  #E0D8FF 0%,transparent 55%),
     linear-gradient(160deg,#EBE8FF 0%,#F5F3FF 45%,#ECF8F4 100%);
-  /* background-attachment:fixed removed — buggy on Android Chrome */
   background-attachment:scroll;
+  /* Remove body padding — let .app fill screen edge-to-edge on mobile */
   display:flex; justify-content:center; align-items:flex-start;
-  padding:24px 12px 64px;
   transition:background .4s ease;
+  /* No padding, no min-height — .app handles its own sizing */
 }
 .app{
-  width:100%; max-width:420px; min-height:100vh; min-height:100svh;
+  width:100%; max-width:420px;
+  /* Fill full viewport height — content scrolls inside .menu-scroll */
+  height:100vh; height:100svh;
   background:var(--app-bg);
-  border-radius:var(--r2xl);
-  box-shadow:0 0 0 1px rgba(123,110,246,.1),0 2px 4px rgba(123,110,246,.06),0 20px 60px rgba(100,90,200,.18),0 40px 80px rgba(0,0,0,.08);
-  overflow:clip; display:flex; flex-direction:column; position:relative;
+  border-radius:0;
+  overflow:hidden;
+  display:flex; flex-direction:column; position:relative;
   transition:background .3s ease;
-  /* overflow:clip instead of overflow:hidden — fixes Android Chrome blank content bug */
-  -webkit-overflow-scrolling:touch;
-  contain:layout style;
 }
-.page{display:none;flex-direction:column;flex:1;}
+/* On wider screens show as a card */
+@media(min-width:441px){
+  .app{
+    min-height:100vh; height:auto;
+    border-radius:var(--r2xl);
+    margin:24px 0 64px;
+    box-shadow:0 0 0 1px rgba(123,110,246,.1),0 2px 4px rgba(123,110,246,.06),0 20px 60px rgba(100,90,200,.18),0 40px 80px rgba(0,0,0,.08);
+    overflow:visible;
+  }
+}
+.page{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
 .page.active{display:flex;}
 .page-enter{animation:pgIn .32s cubic-bezier(.22,1,.36,1) both;}
 @keyframes pgIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
@@ -217,14 +231,24 @@ body{
 .hdr-avatar:hover{transform:scale(1.09);}
 
 /* ── MENU PAGE ─────────────────────────────── */
-.menu-scroll{flex:1;overflow-y:auto;padding:16px 14px 28px;display:flex;flex-direction:column;gap:16px;}
-.menu-scroll::-webkit-scrollbar{width:0;}
+.menu-scroll{
+  flex:1;
+  min-height:0; /* critical — allows flex child to shrink and scroll */
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:12px 14px 24px;
+  display:flex;flex-direction:column;
+  gap:10px; /* reduced from 16px — eliminates dead space */
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  will-change:transform;
+}
 
 /* XP / Level bar on menu */
 .xp-hero{
-  background:var(--white);border-radius:var(--rxl);padding:16px 18px;
+  background:var(--white);border-radius:var(--rxl);padding:12px 16px;
   box-shadow:var(--sh2);border:1px solid rgba(255,255,255,.95);
-  display:flex;flex-direction:column;gap:10px;
+  display:flex;flex-direction:column;gap:8px;
   transition:background .3s;
 }
 .xp-row{display:flex;align-items:center;justify-content:space-between;}
@@ -263,22 +287,21 @@ body{
 /* Hero banner */
 .hero{
   background:linear-gradient(135deg,#6B5EE8 0%,#7B6EF6 40%,#9580F8 78%,#A794FA 100%);
-  border-radius:var(--rxl);padding:22px 20px 20px;
+  border-radius:var(--rxl);padding:16px 18px 14px;
   color:white;position:relative;overflow:hidden;
-  box-shadow:0 10px 32px rgba(107,94,232,.45),0 3px 8px rgba(0,0,0,.08);
+  box-shadow:0 8px 24px rgba(107,94,232,.38),0 2px 6px rgba(0,0,0,.06);
   transition:background .3s;
 }
-.hero::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.08);top:-70px;right:-50px;pointer-events:none;}
-.hero::after{content:'';position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.06);bottom:-30px;right:50px;pointer-events:none;}
+.hero::before{content:'';position:absolute;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.08);top:-50px;right:-40px;pointer-events:none;}
 .hero-inner{position:relative;z-index:1;}
-.hero-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.32);border-radius:var(--rp);padding:4px 12px;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;backdrop-filter:blur(4px);}
-.hero-title{font-family:var(--f-num);font-size:1.7rem;font-weight:800;line-height:1.14;margin-bottom:6px;text-shadow:0 2px 10px rgba(0,0,0,.12);}
-.hero-sub{font-size:.79rem;opacity:.78;font-weight:600;line-height:1.4;}
-.hero-chips{display:flex;gap:10px;margin-top:18px;}
-.hero-chip{flex:1;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.26);border-radius:var(--rm);padding:11px 12px;backdrop-filter:blur(8px);transition:background .2s;}
+.hero-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.32);border-radius:var(--rp);padding:3px 10px;font-size:.6rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+.hero-title{font-family:var(--f-num);font-size:1.4rem;font-weight:800;line-height:1.2;margin-bottom:4px;text-shadow:0 2px 8px rgba(0,0,0,.12);}
+.hero-sub{font-size:.74rem;opacity:.78;font-weight:600;line-height:1.4;}
+.hero-chips{display:flex;gap:8px;margin-top:12px;}
+.hero-chip{flex:1;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.26);border-radius:var(--rm);padding:9px 10px;transition:background .2s;}
 .hero-chip:hover{background:rgba(255,255,255,.24);}
-.hc-val{font-family:var(--f-num);font-size:1.5rem;font-weight:900;line-height:1;}
-.hc-lbl{font-size:.59rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.72;margin-top:4px;}
+.hc-val{font-family:var(--f-num);font-size:1.3rem;font-weight:900;line-height:1;}
+.hc-lbl{font-size:.56rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.72;margin-top:3px;}
 
 /* Daily Challenge card */
 .daily-card{
@@ -370,18 +393,34 @@ body{
 .play-cta:active{transform:scale(.97);}
 
 /* menu stats-btn row */
-.menu-btns{display:flex;gap:8px;}
+/* Menu icon buttons — 3-col grid, compact */
+.menu-btns{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+}
 .menu-icon-btn{
-  flex:1;padding:12px 8px;border-radius:var(--rl);
+  padding:10px 6px;border-radius:var(--rm);
   background:var(--white);border:1.5px solid var(--g200);
-  font-family:var(--f-ui);font-size:.78rem;font-weight:700;color:var(--g500);
-  cursor:pointer;transition:var(--ease);display:flex;align-items:center;justify-content:center;gap:6px;
-  box-shadow:var(--sh0);
+  font-family:var(--f-ui);font-size:.72rem;font-weight:700;color:var(--g500);
+  cursor:pointer;transition:var(--ease);
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  box-shadow:var(--sh0);text-align:center;white-space:nowrap;
 }
 .menu-icon-btn:hover{transform:translateY(-2px);box-shadow:var(--sh2);border-color:var(--g300);}
 
 /* ── GAME PAGE ─────────────────────────────── */
-.game-body{flex:1;overflow-y:auto;padding:12px 12px 20px;display:flex;flex-direction:column;gap:10px;}
+.game-body{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:12px 12px 20px;
+  display:flex;flex-direction:column;gap:10px;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  will-change:transform;
+}
 .game-body::-webkit-scrollbar{width:0;}
 
 /* Time Attack big countdown */
@@ -595,8 +634,29 @@ body{
   isolation:isolate;
 }
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal-card{width:100%;max-width:355px;background:var(--white);border-radius:var(--rxl);overflow:hidden;box-shadow:0 28px 80px rgba(28,26,56,.30),0 8px 24px rgba(0,0,0,.1);transform:scale(.88) translateY(24px);transition:transform .38s cubic-bezier(.22,1,.36,1),background .3s;}
+.modal-card{
+  width:100%;max-width:355px;background:var(--white);border-radius:var(--rxl);
+  /* overflow:hidden replaced with overflow:visible + children clip themselves */
+  /* overflow:hidden was blocking touch scroll inside modal body on Android */
+  overflow:visible;
+  box-shadow:0 28px 80px rgba(28,26,56,.30),0 8px 24px rgba(0,0,0,.1);
+  transform:scale(.88) translateY(24px);transition:transform .38s cubic-bezier(.22,1,.36,1),background .3s;
+  /* Clip the rounded corners properly without blocking scroll */
+  border-radius:var(--rxl);
+}
 .modal-overlay.open .modal-card{transform:none;}
+/* Modal hero clips itself */
+.modal-hero{border-radius:var(--rxl) var(--rxl) 0 0;overflow:hidden;}
+.modal-body{
+  padding:20px 20px 24px;display:flex;flex-direction:column;gap:12px;
+  background:var(--white);transition:background .3s;
+  border-radius:0 0 var(--rxl) var(--rxl);
+  overflow:hidden;
+  /* Allow scroll inside modal body when content is tall */
+  max-height:75vh;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+}
 .modal-hero{background:linear-gradient(135deg,#6B5EE8,#7B6EF6,#9580F8);padding:30px 24px 26px;text-align:center;position:relative;overflow:hidden;transition:background .3s;}
 .modal-hero::before{content:'';position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.1);top:-55px;right:-35px;pointer-events:none;}
 .modal-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.14) 0%,transparent 50%);pointer-events:none;}
@@ -718,21 +778,21 @@ body.dark .boss-banner{background:linear-gradient(135deg,#2A0A18 0%,#3B1A2A 100%
 /* ── LOGIN STREAK ────────────────────────────── */
 .streak-card{
   background:linear-gradient(135deg,#F5A623 0%,#F0707A 100%);
-  border-radius:var(--rxl);padding:16px 18px;color:white;
-  position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(245,166,35,.35);
+  border-radius:var(--rxl);padding:12px 16px;color:white;
+  position:relative;overflow:hidden;box-shadow:0 6px 18px rgba(245,166,35,.3);
 }
-.streak-card::before{content:'';position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.1);top:-40px;right:-30px;}
-.streak-card-inner{position:relative;z-index:1;}
-.streak-top{display:flex;align-items:center;justify-content:space-between;}
-.streak-lbl{font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.75;}
-.streak-badge{font-size:.6rem;font-weight:800;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.3);border-radius:var(--rp);padding:3px 10px;}
-.streak-val{font-family:var(--f-num);font-size:3rem;font-weight:900;line-height:1;margin:6px 0 2px;}
-.streak-sub{font-size:.75rem;opacity:.82;font-weight:600;}
-.streak-dots{display:flex;gap:6px;margin-top:12px;}
-.streak-dot{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+.streak-card::before{content:'';position:absolute;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1);top:-30px;right:-20px;}
+.streak-card-inner{position:relative;z-index:1;display:flex;align-items:center;gap:14px;}
+.streak-top{display:flex;flex-direction:column;flex:1;}
+.streak-lbl{font-size:.58rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;opacity:.75;}
+.streak-badge{font-size:.58rem;font-weight:800;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.3);border-radius:var(--rp);padding:2px 8px;margin-top:3px;display:inline-block;}
+.streak-val{font-family:var(--f-num);font-size:2.2rem;font-weight:900;line-height:1;flex-shrink:0;}
+.streak-sub{display:none;} /* hidden in compact mode */
+.streak-dots{display:flex;gap:5px;margin-top:0;}
+.streak-dot{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.2);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-size:.7rem;}
 .streak-dot.done{background:rgba(255,255,255,.9);border-color:white;}
 .streak-dot.today{background:rgba(255,255,255,.4);border-color:white;animation:todayPulse .8s ease infinite alternate;}
-@keyframes todayPulse{from{box-shadow:0 0 0 0 rgba(255,255,255,.4)}to{box-shadow:0 0 0 6px rgba(255,255,255,.1)}}
+@keyframes todayPulse{from{box-shadow:0 0 0 0 rgba(255,255,255,.4)}to{box-shadow:0 0 0 5px rgba(255,255,255,.1)}}
 
 /* ── PRESTIGE / SEASON ───────────────────────── */
 .prestige-badge{
@@ -935,6 +995,8 @@ body.dark .sp-btn.selected{background:var(--lav-pale);border-color:var(--lav);co
   box-shadow:var(--sh2);border:1px solid rgba(255,255,255,.95);
   display:flex;flex-direction:column;gap:12px;
   transition:background .3s;
+  /* Prevent collapse to blank while JS populates quest list */
+  min-height:80px;
 }
 .quest-head{display:flex;align-items:center;justify-content:space-between;}
 .quest-title-row{display:flex;align-items:center;gap:7px;font-family:var(--f-num);font-size:.82rem;font-weight:800;color:var(--g900);}
@@ -1267,10 +1329,11 @@ body.dark .eq-target{background:linear-gradient(135deg,var(--amber-pale),var(--l
 ══════════════════════════════════════════════ */
 .cloud-status-bar{
   display:flex;align-items:center;gap:8px;
-  padding:8px 14px;border-radius:var(--rp);
-  font-size:.72rem;font-weight:700;
+  padding:9px 14px;border-radius:var(--rm);
+  font-size:.74rem;font-weight:700;
   transition:var(--ease);cursor:pointer;
   border:1.5px solid transparent;
+  line-height:1.3;
 }
 .cloud-status-bar.signed-out{background:var(--g100);border-color:var(--g200);color:var(--g500);}
 .cloud-status-bar.signed-in{background:var(--lav-pale);border-color:var(--lav);color:var(--lav);}
@@ -1481,15 +1544,13 @@ body.dark .fc-github{color:var(--g500);}
   body{padding:0;}
   .app{
     border-radius:0;
-    min-height:100vh;
-    min-height:100svh; /* svh = stable viewport height, no jump on Android URL bar */
     box-shadow:none;
+    /* Disable backdrop-filter on mobile — causes blank rendering on Android Chrome */
   }
-  .ans-grid{grid-template-columns:1fr 1fr;}
-  /* Remove hero-chip backdrop-filter on mobile to prevent blank rendering */
   .hero-chip{ backdrop-filter:none; -webkit-backdrop-filter:none; }
   .hero-badge{ backdrop-filter:none; -webkit-backdrop-filter:none; }
-  /* Force GPU layer on menu-scroll to prevent blank repaint */
-  .menu-scroll{ transform:translateZ(0); -webkit-transform:translateZ(0); }
+  .ans-grid{grid-template-columns:1fr 1fr;}
 }
-@media(min-width:441px) and (max-width:560px){body{padding:10px 8px 30px;}}
+@media(min-width:441px){
+  body{ padding:20px 12px 48px; }
+}
