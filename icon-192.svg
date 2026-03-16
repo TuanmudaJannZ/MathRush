@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="40" fill="#7B6EF6"/>
-  <rect x="16" y="16" width="160" height="160" rx="32" fill="#9B8EFA" opacity="0.3"/>
-  <text x="96" y="126" font-size="88" text-anchor="middle" font-family="system-ui">🧠</text>
-  <text x="96" y="172" font-size="18" text-anchor="middle" font-family="Poppins,system-ui" font-weight="800" fill="white" opacity="0.85">MathRush</text>
-</svg>
